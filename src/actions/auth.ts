@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { env } from "@/lib/env";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -30,13 +31,13 @@ export async function signup(formData: FormData) {
     password,
     options: {
       data: { full_name: fullName },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/auth/callback`,
+      emailRedirectTo: `${env.siteUrl}/auth/callback`,
     },
   });
 
   if (error) return { error: error.message };
 
-  return { success: "בדוק את האימייל שלך לאישור ההרשמה." };
+  redirect("/check-email");
 }
 
 export async function resetPassword(formData: FormData) {
@@ -45,7 +46,7 @@ export async function resetPassword(formData: FormData) {
   const { error } = await supabase.auth.resetPasswordForEmail(
     formData.get("email") as string,
     {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/auth/callback?next=/update-password`,
+      redirectTo: `${env.siteUrl}/auth/callback?next=/update-password`,
     }
   );
 
